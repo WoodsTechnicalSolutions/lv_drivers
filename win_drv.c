@@ -151,8 +151,8 @@ static void do_register(void)
 
     /* Example for 1) */
     static lv_disp_buf_t disp_buf_1;
-    static lv_color_t buf1_1[WINDOW_HOR_RES * 10];                      /*A buffer for 10 rows*/
-    lv_disp_buf_init(&disp_buf_1, buf1_1, NULL, WINDOW_HOR_RES * 10);   /*Initialize the display buffer*/
+    static lv_color_t buf1_1[WINDOW_HOR_RES * WINDOW_VER_RES];                      /*A buffer for 10 rows*/
+    lv_disp_buf_init(&disp_buf_1, buf1_1, NULL, WINDOW_HOR_RES * WINDOW_VER_RES);   /*Initialize the display buffer*/
 
 
     /*-----------------------------------
@@ -277,8 +277,6 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         fbp = malloc(4*WINDOW_HOR_RES*WINDOW_VER_RES);
         if(fbp == NULL)
             return 1;
-        SetTimer(hwnd, 0, 10, (TIMERPROC)lv_task_handler);
-        SetTimer(hwnd, 1, 25, NULL);
 
         return 0;
     case WM_MOUSEMOVE:
@@ -297,9 +295,6 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         return 0;
     case WM_PAINT:
         on_paint();
-        return 0;
-    case WM_TIMER:
-        lv_tick_inc(25);
         return 0;
     case WM_DESTROY:
         PostQuitMessage(0);
