@@ -122,6 +122,7 @@ struct buffer_hdl
     int size;
     struct wl_buffer *wl_buffer;
     bool busy;
+    lv_disp_drv_t * disp_waiting_flush_ready;
 };
 
 struct buffer_allocator
@@ -1213,6 +1214,10 @@ static void handle_wl_buffer_release(void *data, struct wl_buffer *wl_buffer)
 {
     struct buffer_hdl *buffer_hdl = (struct buffer_hdl *)data;
     buffer_hdl->busy = false;
+    if(buffer_hdl->disp_waiting_flush_ready) {
+        lv_disp_flush_ready(buffer_hdl->disp_waiting_flush_ready);
+        buffer_hdl->disp_waiting_flush_ready = NULL;
+    }
 }
 
 static const struct wl_buffer_listener wl_buffer_listener = {
@@ -1950,12 +1955,6 @@ static void _lv_wayland_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv
         lv_disp_flush_ready(disp_drv);
         return;
     }
-    else if (buffer->busy)
-    {
-        LV_LOG_WARN("skip flush since wayland backing buffer is busy");
-        lv_disp_flush_ready(disp_drv);
-        return;
-    }
 
     int32_t x;
     int32_t y;
@@ -1994,6 +1993,7 @@ static void _lv_wayland_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv
            wl_surface_commit(window->body->surface);
         }
         buffer->busy = true;
+        buffer->disp_waiting_flush_ready = disp_drv;
         window->flush_pending = true;
     }
 
