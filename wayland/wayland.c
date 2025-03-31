@@ -1995,6 +1995,7 @@ static void _lv_wayland_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv
         buffer->busy = true;
         buffer->disp_waiting_flush_ready = disp_drv;
         window->flush_pending = true;
+        return;
     }
 
     lv_disp_flush_ready(disp_drv);
@@ -2113,6 +2114,13 @@ static void _lv_wayland_handle_output(void)
 static void _lv_wayland_cycle(lv_timer_t * tmr)
 {
     LV_UNUSED(tmr);
+    _lv_wayland_handle_input();
+    _lv_wayland_handle_output();
+}
+
+static void _lv_wayland_wait(lv_disp_drv_t * disp_drv)
+{
+    LV_UNUSED(disp_drv);
     _lv_wayland_handle_input();
     _lv_wayland_handle_output();
 }
@@ -2343,6 +2351,7 @@ lv_disp_t * lv_wayland_create_window(lv_coord_t hor_res, lv_coord_t ver_res, cha
     window->lv_disp_drv.hor_res = hor_res;
     window->lv_disp_drv.ver_res = ver_res;
     window->lv_disp_drv.flush_cb = _lv_wayland_flush;
+    window->lv_disp_drv.wait_cb = _lv_wayland_wait;
     window->lv_disp_drv.user_data = window;
 
     /* Register display */
